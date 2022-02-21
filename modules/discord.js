@@ -3,7 +3,7 @@ const fs = require("fs");
 const { TOKEN, GUILD_ID } = require('./config');
 
 function importCommands() {
-    const commandFiles = fs.readdirSync("./commands").filter(f => f.endsWith(".js"));
+    const commandFiles = fs.readdirSync("./commands").filter(f => f.endsWith(".js") && !f.startsWith('_'));
     let commands = new Discord.Collection;
     for (const file of commandFiles) {
         const command = require(`../commands/${ file }`);

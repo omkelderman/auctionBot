@@ -1,4 +1,5 @@
 const { ADMIN_ROLE_ID } = require('../modules/config');
+const { addDataToBiddersArray } = require('./_util');
 
 module.exports = {
     data: {
@@ -7,31 +8,26 @@ module.exports = {
         defaultPermission: false,
     },
     handler: async (interaction, db) => {
-        const rows = await db.all(`
+        const bidders = await db.all(`
             SELECT *
             FROM bidders`,
         );
 
-        if (!rows.length) interaction.reply({ content: "No bidder exists!", ephemeral: true });
-        else {
-            const output = [];
-            await interaction.guild.members.fetch();
-            for (const r of rows) {
-                const member = interaction.guild.members.cache.get(r.discord_id);
-                const teamMembers = await db.all(`
-                    SELECT p.username
-                    FROM bids b,
-                         players p
-                    WHERE b.player_id = p.user_id
-                      AND b.final_bidder = '${ member.id }';
-                `);
-                if (teamMembers.length)
-                    output.push(`${ member.displayName } | ${ teamMembers.map(p => p.username).join(", ") }`);
-                else
-                    output.push(`${ member.displayName } | -`);
-            }
-            interaction.reply({ content: output.join("\n") });
+        if (!bidders.length) {
+            interaction.reply({ content: "No bidder exists!", ephemeral: true });
+            return;
         }
+
+        await addDataToBiddersArray(bidders, db, interaction.guild.members, true);
+
+        const output = bidders.map(bidder => {
+            if(!bidder.boughtGroups.length) {
+                return '-';
+            }
+            const team = bidder.boughtGroups.map(g => `${g.groupName} (${g.playerNames.join(', ')})`).join(', ');
+            return `${bidder.bidder_name} (${bidder.members.join(', ')}): ${team}`;
+        });
+        interaction.reply({ content: output.join("\n") });
     },
     permissions: [
         {

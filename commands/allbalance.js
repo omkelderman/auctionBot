@@ -1,4 +1,5 @@
 const { ADMIN_ROLE_ID } = require('../modules/config');
+const { addDataToBiddersArray } = require('./_util');
 
 module.exports = {
     data: {
@@ -7,21 +8,20 @@ module.exports = {
         defaultPermission: false,
     },
     handler: async (interaction, db) => {
-        const rows = await db.all(`
+        const bidders = await db.all(`
             SELECT *
-            FROM bidders`,
+            FROM bidders
+            WHERE balance > 0`,
         );
 
-        if (!rows.length) interaction.reply({ content: "No bidder has currency!", ephemeral: true });
-        else {
-            const output = [];
-            await interaction.guild.members.fetch();
-            for (const r of rows) {
-                const member = interaction.guild.members.cache.get(r.discord_id);
-                output.push(`${ member.displayName } ($${ r.balance })`);
-            }
-            interaction.reply({ content: output.join("\n") });
+        if (!bidders.length) {
+            await interaction.reply({ content: "No bidder has currency!", ephemeral: true });
+            return;
         }
+
+        await addDataToBiddersArray(bidders, db, interaction.guild.members);
+        const output = bidders.map(bidder => `${bidder.bidder_name} (${ bidder.members.join(', ') }): $${ bidder.balance }`);
+        await interaction.reply({ content: output.join("\n") });
     },
     permissions: [
         {

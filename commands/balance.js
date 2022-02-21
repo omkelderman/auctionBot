@@ -1,4 +1,5 @@
 const { BIDDER_ROLE_ID } = require('../modules/config');
+const { getSingleBidderWithData } = require('./_util');
 
 module.exports = {
     data: {
@@ -7,15 +8,13 @@ module.exports = {
         defaultPermission: false,
     },
     handler: async (interaction, db) => {
-        const row = await db.get(`
-                    SELECT balance
-                    FROM bidders
-                    WHERE discord_id = ?`,
-            interaction.user.id,
-        );
+        const bidder = await getSingleBidderWithData(interaction.user.id, interaction, db, false);
+        if(!bidder) {
+            await interaction.reply({ content: 'You are not a bidder??? This should not happen, inform an admin please!', ephemeral: true });
+            return;
+        }
 
-        const content = row ? `Current balance: ${ row.balance }` : "No currency set, please ping an admin to set your currency";
-        interaction.reply({ content, ephemeral: true });
+        await interaction.reply({ content: `${bidder.bidder_name} (${bidder.members.join(', ')}): $${bidder.balance}`, ephemeral: true });
     },
     permissions: [
         {

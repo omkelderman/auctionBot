@@ -1,4 +1,5 @@
 const { BIDDER_ROLE_ID } = require('../modules/config');
+const { getSingleBidderWithData } = require('./_util');
 
 module.exports = {
     data: {
@@ -7,20 +8,19 @@ module.exports = {
         defaultPermission: false,
     },
     handler: async (interaction, db) => {
-        const rows = await db.all(`
-            SELECT *
-            FROM players p,
-                 bids b
-            WHERE p.user_id = b.player_id
-              AND b.final_bidder = '${ interaction.user.id }';`,
-        );
-
-        if (!rows.length) {
-            interaction.reply({ content: "You have not bought any players so far!", ephemeral: true });
+        const bidder = await getSingleBidderWithData(interaction.user.id, interaction, db, true);
+        if(!bidder) {
+            await interaction.reply({ content: 'You are not a bidder??? This should not happen, inform an admin please!', ephemeral: true });
             return;
         }
 
-        interaction.reply({ content: rows.map(p => `${ p.username } ($${ p.sale_value })`).join("\n") })
+        const header = `${bidder.bidder_name} (${bidder.members.join(', ')})`;
+        if(bidder.boughtGroups.length) {
+            const team = bidder.boughtGroups.map(g => `- ${g.groupName} ($${g.saleValue}): ${g.playerNames.join(', ')}`);
+            await interaction.reply(`${header}:\n${team.join('\n')}`);
+        } else {
+            await interaction.reply(`${header}: -`);
+        }
     }
     ,
     permissions: [

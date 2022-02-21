@@ -1,4 +1,5 @@
-const { ADMIN_ROLE_ID, BIDDER_ROLE_ID } = require('../modules/config');
+const { ADMIN_ROLE_ID } = require('../modules/config');
+const { getSingleBidderWithData } = require('./_util');
 
 module.exports = {
     data: {
@@ -19,16 +20,20 @@ module.exports = {
     },
     handler: async (interaction, db) => {
         const { member } = interaction.options.get("user");
-        if (!member.roles.cache.get(BIDDER_ROLE_ID)) {
+        const bidder = await getSingleBidderWithData(member.id, interaction, db, false);
+        if(!bidder) {
             await interaction.reply("Mentioned user is not a bidder!");
             return;
         }
         const amount = interaction.options.get("amount").value;
 
-        db.run(`REPLACE INTO bidders (discord_id, balance)
-                VALUES ('${ member.id }', ${ amount })`)
+        await db.run(`
+            UPDATE bidders
+            SET balance = ?
+            WHERE bidder_id = ?
+        `, amount, bidder.bidder_id);
 
-        await interaction.reply(`Set currency of ${ member.displayName } to ${ amount }`);
+        await interaction.reply(`Set currency of ${bidder.bidder_name} (${bidder.members.join(', ')}) to ${ amount }`);
     },
     permissions: [
         {
