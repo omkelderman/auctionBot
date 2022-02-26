@@ -14,7 +14,7 @@ module.exports = {
             return;
         }
 
-        await interaction.reply({ content: `${bidder.bidder_name} (${bidder.members.join(', ')}): $${bidder.balance}`, ephemeral: true });
+        await interaction.reply({ content: `**${bidder.bidder_name}** (${bidder.members.join(', ')}): $${bidder.balance}`, ephemeral: true });
     },
     permissions: [
         {

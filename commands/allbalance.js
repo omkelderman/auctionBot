@@ -20,7 +20,7 @@ module.exports = {
         }
 
         await addDataToBiddersArray(bidders, db, interaction.guild.members);
-        const output = bidders.map(bidder => `${bidder.bidder_name} (${ bidder.members.join(', ') }): $${ bidder.balance }`);
+        const output = bidders.map(bidder => `**${bidder.bidder_name}** (${ bidder.members.join(', ') }): $${ bidder.balance }`);
         await interaction.reply({ content: output.join("\n") });
     },
     permissions: [

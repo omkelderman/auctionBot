@@ -22,9 +22,9 @@ module.exports = {
 
         const output = bidders.map(bidder => {
             const team = bidder.boughtGroups.length
-                ? bidder.boughtGroups.map(g => `${g.groupName} (${g.playerNames.join(', ')})`).join(', ')
+                ? bidder.boughtGroups.map(g => `**${g.groupName}** (${g.playerNames.join(', ')})`).join(', ')
                 : '-';
-            return `${bidder.bidder_name} (${bidder.members.join(', ')}): ${team}`;
+            return `**${bidder.bidder_name}** (${bidder.members.join(', ')}): ${team}`;
         });
         await interaction.reply({ content: output.join("\n") });
     },

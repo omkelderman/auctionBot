@@ -14,9 +14,9 @@ module.exports = {
             return;
         }
 
-        const header = `${bidder.bidder_name} (${bidder.members.join(', ')})`;
+        const header = `**${bidder.bidder_name}** (${bidder.members.join(', ')})`;
         if(bidder.boughtGroups.length) {
-            const team = bidder.boughtGroups.map(g => `- ${g.groupName} ($${g.saleValue}): ${g.playerNames.join(', ')}`);
+            const team = bidder.boughtGroups.map(g => `- **${g.groupName}** ($${g.saleValue}): ${g.playerNames.join(', ')}`);
             await interaction.reply(`${header}:\n${team.join('\n')}`);
         } else {
             await interaction.reply(`${header}: -`);
