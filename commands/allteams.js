@@ -21,10 +21,9 @@ module.exports = {
         await addDataToBiddersArray(bidders, db, interaction.guild.members, true);
 
         const output = bidders.map(bidder => {
-            if(!bidder.boughtGroups.length) {
-                return '-';
-            }
-            const team = bidder.boughtGroups.map(g => `${g.groupName} (${g.playerNames.join(', ')})`).join(', ');
+            const team = bidder.boughtGroups.length
+                ? bidder.boughtGroups.map(g => `${g.groupName} (${g.playerNames.join(', ')})`).join(', ')
+                : '-';
             return `${bidder.bidder_name} (${bidder.members.join(', ')}): ${team}`;
         });
         interaction.reply({ content: output.join("\n") });
