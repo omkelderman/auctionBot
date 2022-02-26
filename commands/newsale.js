@@ -1,6 +1,6 @@
 const Discord = require("discord.js")
 const { ADMIN_ROLE_ID, MIN_INCREMENT, INITIAL_TIMER, IDLE_TIMER, MAX_BID, BID_GROUP_NAME, BID_GROUP_NAME_PLURAL, GROUP_NAME_EMBED_COLOR, PLAYER_INFO_EMBED_COLOR } = require('../modules/config');
-const { getSingleBidderWithData } = require('./_util');
+const { getSingleBidderWithData, addPlayerDataToPlayerGroups } = require('./_util');
 
 async function checkBid(bidValue, bidInteraction, balance, saleValue) {
     if (bidValue > MAX_BID) {
@@ -191,11 +191,7 @@ module.exports = {
             return;
         }
 
-        randomAvailableGroup.players = await db.all(`
-            SELECT *
-            FROM players
-            WHERE GROUP_ID = ?
-        `, randomAvailableGroup.group_id);
+        await addPlayerDataToPlayerGroups([randomAvailableGroup], db);
 
         // create bid
         await db.run(`
