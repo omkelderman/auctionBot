@@ -50,12 +50,9 @@ async function addDataToBiddersArray(bidders, db, disordGuildMembers, includeBou
 
     if (groupsPerGroupId.size) {
         const allPlayers = await db.all(`
-            SELECT p.username,
-                g.group_id
-            FROM players p,
-                player_groups g
-            WHERE p.group_id = g.group_id
-                AND g.group_id IN (${[...groupsPerGroupId.keys()].join(',')})
+            SELECT username, group_id
+            FROM players
+            WHERE group_id IN (${[...groupsPerGroupId.keys()].join(',')})
         `);
 
         for (const player of allPlayers) {

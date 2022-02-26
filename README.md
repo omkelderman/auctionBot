@@ -1,5 +1,7 @@
 # auctionBot
 
+TODO: fix this text, half of whats here does not apply anymore
+
 - to be hosted yourself
 - have node and node package manager of your choice installed
 - install dependencies

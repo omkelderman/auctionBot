@@ -1,9 +1,9 @@
-const { BIDDER_ROLE_ID } = require('../modules/config');
+const { BIDDER_ROLE_ID, BID_GROUP_NAME } = require('../modules/config');
 
 module.exports = {
     data: {
         name: "bid",
-        description: "Bid on the currently auctioned player!",
+        description: `Bid on the currently auctioned ${BID_GROUP_NAME}!`,
         defaultPermission: false,
         options: [{
             name: "amount",

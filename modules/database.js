@@ -13,10 +13,6 @@ async function initPlayersTable(db) {
             badges          TEXT,
             badge_ranks     TEXT,
             bws             NUMERIC,
-            tier            INTEGER,
-            flag            TEXT,
-            url             TEXT,
-            image           TEXT,
             qualifier_seed  INTEGER
         ) WITHOUT ROWID
     `);
