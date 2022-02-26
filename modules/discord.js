@@ -12,7 +12,7 @@ function importCommands() {
     return commands;
 }
 
-async function run(db) {
+async function run(db, sheetsApiClient) {
     let commands = importCommands();
 
     const intents = new Discord.Intents();
@@ -40,12 +40,12 @@ async function run(db) {
         const commandName = interaction.commandName.toLowerCase();
         console.log(`Received interaction "${commandName}" from "${interaction.user.username}"`)
         try {
-            await commands.get(commandName).handler(interaction, db);
+            await commands.get(commandName).handler(interaction, db, sheetsApiClient);
         } catch (e) {
             console.error(e);
 
             try {
-                if (interaction.replied) {
+                if (interaction.replied || interaction.deferred) {
                     await interaction.followUp({
                         content: `Something went wrong while executing this command!\n\`${e}\``,
                         ephemeral: true,
