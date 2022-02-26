@@ -197,8 +197,6 @@ module.exports = {
             WHERE GROUP_ID = ?
         `, randomAvailableGroup.group_id);
 
-        console.log(randomAvailableGroup);
-
         // create bid
         await db.run(`
             INSERT INTO bids (group_id, sale_value, ongoing, start_time)
