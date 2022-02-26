@@ -2,9 +2,9 @@ const Discord = require("discord.js")
 const { ADMIN_ROLE_ID, MIN_INCREMENT, INITIAL_TIMER, IDLE_TIMER, MAX_BID, BID_GROUP_NAME, BID_GROUP_NAME_PLURAL, GROUP_NAME_EMBED_COLOR, PLAYER_INFO_EMBED_COLOR } = require('../modules/config');
 const { getSingleBidderWithData } = require('./_util');
 
-function checkBid(bidValue, bidInteraction, balance, saleValue) {
+async function checkBid(bidValue, bidInteraction, balance, saleValue) {
     if (bidValue > MAX_BID) {
-        bidInteraction.reply({
+        await bidInteraction.reply({
             content: `You're only allowed to bid up to a maximum of ${ MAX_BID } in an auction! Bid ${ MAX_BID } exactly in case you want to buy the ${BID_GROUP_NAME} instantly.`,
             ephemeral: true,
         });
@@ -12,7 +12,7 @@ function checkBid(bidValue, bidInteraction, balance, saleValue) {
     }
 
     if (bidValue > balance) {
-        bidInteraction.reply({
+        await bidInteraction.reply({
             content: `You cannot bid more money than you currently possess! (${ balance })`,
             ephemeral: true,
         });
@@ -20,7 +20,7 @@ function checkBid(bidValue, bidInteraction, balance, saleValue) {
     }
 
     if (bidValue < saleValue + MIN_INCREMENT) {
-        bidInteraction.reply({
+        await bidInteraction.reply({
             content: `You have to bid at least ${ saleValue + MIN_INCREMENT } or higher!`,
             ephemeral: true,
         });
@@ -28,7 +28,7 @@ function checkBid(bidValue, bidInteraction, balance, saleValue) {
     }
 
     if (bidValue % MIN_INCREMENT !== 0) {
-        bidInteraction.reply({
+        await bidInteraction.reply({
             content: `The bid was not an increment of ${ MIN_INCREMENT }!`,
             ephemeral: true,
         });
@@ -59,12 +59,12 @@ function initCollector(interaction, db, group) {
         }
 
         const bidValue = bidInteraction.options.get("amount").value;
-        if (!checkBid(bidValue, bidInteraction, bidder.balance, saleValue)) return;
+        if (!await checkBid(bidValue, bidInteraction, bidder.balance, saleValue)) return;
 
         saleValue = bidValue;
         lastBidder = bidder;
         const bidderStr = `${bidder.bidder_name} (${bidder.members.join(', ')})`;
-        bidInteraction.reply(`${bidderStr} bids ${bidValue}.`);
+        await bidInteraction.reply(`${bidderStr} bids ${bidValue}.`);
 
         if (bidValue === MAX_BID) collector.stop();
         collector.resetTimer({ time: IDLE_TIMER });
@@ -174,7 +174,7 @@ module.exports = {
         `);
 
         if (ongoing) {
-            interaction.reply("There is already a sale ongoing!")
+            await interaction.reply("There is already a sale ongoing!")
             return;
         }
 
@@ -187,7 +187,7 @@ module.exports = {
         `);
 
         if (!randomAvailableGroup) {
-            interaction.reply(`No more ${BID_GROUP_NAME_PLURAL} to auction!`);
+            await interaction.reply(`No more ${BID_GROUP_NAME_PLURAL} to auction!`);
             return;
         }
 
@@ -205,7 +205,7 @@ module.exports = {
             VALUES (?, 0, TRUE, datetime('now'))
         `, randomAvailableGroup.group_id);
 
-        interaction.reply(generateGroupCardMessage(randomAvailableGroup))
+        await interaction.reply(generateGroupCardMessage(randomAvailableGroup))
 
         initCollector(interaction, db, randomAvailableGroup);
     },

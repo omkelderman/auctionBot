@@ -14,7 +14,7 @@ module.exports = {
         );
 
         if (!bidders.length) {
-            interaction.reply({ content: "No bidder exists!", ephemeral: true });
+            await interaction.reply({ content: "No bidder exists!", ephemeral: true });
             return;
         }
 
@@ -26,7 +26,7 @@ module.exports = {
                 : '-';
             return `${bidder.bidder_name} (${bidder.members.join(', ')}): ${team}`;
         });
-        interaction.reply({ content: output.join("\n") });
+        await interaction.reply({ content: output.join("\n") });
     },
     permissions: [
         {
