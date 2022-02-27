@@ -23,6 +23,7 @@ module.exports = {
     INITIAL_TIMER: parseIntOrThrow(process.env.INITIAL_TIMER),
     IDLE_TIMER: parseIntOrThrow(process.env.IDLE_TIMER),
     MAX_BID: parseIntOrThrow(process.env.MAX_BID),
+    START_VALUE: parseIntOrThrow(process.env.START_VALUE),
     MIN_INCREMENT: parseIntOrThrow(process.env.MIN_INCREMENT),
     BID_GROUP_NAME: process.env.BID_GROUP_NAME,
     BID_GROUP_NAME_PLURAL: process.env.BID_GROUP_NAME_PLURAL,

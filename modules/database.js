@@ -10,18 +10,18 @@ async function initPlayersTable(db) {
             username        TEXT,
             country         TEXT,
             rank            INTEGER,
-            badges          TEXT,
-            badge_ranks     TEXT,
             bws             NUMERIC,
-            qualifier_seed  INTEGER
+            qualifier_seed  INTEGER,
+            badge_count     INTEGER
         ) WITHOUT ROWID
     `);
 
     await db.run(`
         CREATE TABLE IF NOT EXISTS player_groups
         (
-            group_id    INTEGER PRIMARY KEY,
-            group_name  TEXT
+            group_id        INTEGER PRIMARY KEY,
+            group_name      TEXT,
+            qualifier_seed  INTEGER
         )
     `);
 }

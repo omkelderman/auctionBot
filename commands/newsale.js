@@ -1,5 +1,5 @@
 const Discord = require("discord.js")
-const { ADMIN_ROLE_ID, MIN_INCREMENT, INITIAL_TIMER, IDLE_TIMER, MAX_BID, BID_GROUP_NAME, BID_GROUP_NAME_PLURAL, GROUP_NAME_EMBED_COLOR, PLAYER_INFO_EMBED_COLOR } = require('../modules/config');
+const { ADMIN_ROLE_ID, MIN_INCREMENT, INITIAL_TIMER, IDLE_TIMER, MAX_BID, START_VALUE, BID_GROUP_NAME, BID_GROUP_NAME_PLURAL, GROUP_NAME_EMBED_COLOR, PLAYER_INFO_EMBED_COLOR } = require('../modules/config');
 const { getSingleBidderWithData, addPlayerDataToPlayerGroups } = require('./_util');
 
 async function checkBid(bidValue, bidInteraction, balance, saleValue) {
@@ -38,9 +38,8 @@ async function checkBid(bidValue, bidInteraction, balance, saleValue) {
     return true;
 }
 
-// TODO revamp this whole thing
 function initCollector(interaction, db, group) {
-    let saleValue = MIN_INCREMENT;
+    let saleValue = START_VALUE;
     let lastBidder = null;
 
     const collector = new Discord.InteractionCollector(interaction.client, {
@@ -102,7 +101,14 @@ function generateGroupCardMessage(group) {
         embeds: [
             {
                 color: GROUP_NAME_EMBED_COLOR,
-                title: group.group_name
+                title: group.group_name,
+                fields: [
+                    {
+                        name: "Qual. Seed",
+                        value: `#${group.qualifier_seed}`,
+                        inline: true
+                    }
+                ]
             }
         ]
     };
@@ -127,7 +133,7 @@ function generateGroupCardMessage(group) {
                 },
                 {
                     name: "BWS",
-                    value: `#${player.bws}`, // TODO ask dio how to round this, if any, original had Math.ceil
+                    value: `#${player.bws}`,
                     inline: true
                 }
             ],
@@ -141,17 +147,12 @@ function generateGroupCardMessage(group) {
             },
         }
 
-        if(player.badges && player.badge_ranks) {
-            const badgeRanks = player.badge_ranks.split(",");
-            const badges = player.badges.split("\n").map((e, i) => [e.trim(), badgeRanks[i].trim()]);
-            if(badges.length) {
-                playerEmbed.fields.push({
-                    name: `Badges (${ badges.length })`,
-                    value: badges.filter(([_, rank]) => rank)
-                    .map(([name, rank]) => `(#${ rank }) ${ name }`)
-                    .join('\n')
-                });
-            }
+        if(player.badge_count) {
+            playerEmbed.fields.push({
+                name: `Badges`,
+                value: player.badge_count.toString(),
+                inline: true
+            });
         }
 
         msg.embeds.push(playerEmbed);
