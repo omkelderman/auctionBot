@@ -1,11 +1,11 @@
 const Discord = require("discord.js")
-const { ADMIN_ROLE_ID, MIN_INCREMENT, INITIAL_TIMER, IDLE_TIMER, MAX_BID, START_VALUE, BID_GROUP_NAME, BID_GROUP_NAME_PLURAL, GROUP_NAME_EMBED_COLOR, PLAYER_INFO_EMBED_COLOR } = require('../modules/config');
+const { ADMIN_ROLE_ID, MIN_INCREMENT, INITIAL_TIMER, IDLE_TIMER, MAX_BID, START_VALUE, BID_GROUP_NAME, BID_GROUP_NAME_PLURAL, GROUP_NAME_EMBED_COLOR, PLAYER_INFO_EMBED_COLOR, MAX_GROUP_COUNT_IN_TEAM } = require('../modules/config');
 const { getSingleBidderWithData, addPlayerDataToPlayerGroups } = require('./_util');
 
 async function checkBid(bidValue, bidInteraction, balance, saleValue) {
     if (bidValue > MAX_BID) {
         await bidInteraction.reply({
-            content: `You're only allowed to bid up to a maximum of ${ MAX_BID } in an auction! Bid ${ MAX_BID } exactly in case you want to buy the ${BID_GROUP_NAME} instantly.`,
+            content: `You're only allowed to bid up to a maximum of ${MAX_BID} in an auction! Bid ${MAX_BID} exactly in case you want to buy the ${BID_GROUP_NAME} instantly.`,
             ephemeral: true,
         });
         return false;
@@ -13,7 +13,7 @@ async function checkBid(bidValue, bidInteraction, balance, saleValue) {
 
     if (bidValue > balance) {
         await bidInteraction.reply({
-            content: `You cannot bid more money than you currently possess! (${ balance })`,
+            content: `You cannot bid more money than you currently possess! (${balance})`,
             ephemeral: true,
         });
         return false;
@@ -21,7 +21,7 @@ async function checkBid(bidValue, bidInteraction, balance, saleValue) {
 
     if (bidValue < saleValue + MIN_INCREMENT) {
         await bidInteraction.reply({
-            content: `You have to bid at least ${ saleValue + MIN_INCREMENT } or higher!`,
+            content: `You have to bid at least ${saleValue + MIN_INCREMENT} or higher!`,
             ephemeral: true,
         });
         return false;
@@ -29,7 +29,7 @@ async function checkBid(bidValue, bidInteraction, balance, saleValue) {
 
     if (bidValue % MIN_INCREMENT !== 0) {
         await bidInteraction.reply({
-            content: `The bid was not an increment of ${ MIN_INCREMENT }!`,
+            content: `The bid was not an increment of ${MIN_INCREMENT}!`,
             ephemeral: true,
         });
         return false;
@@ -52,8 +52,14 @@ function initCollector(interaction, db, group) {
         if (bidInteraction.commandName.toLowerCase() !== "bid") return;
 
         const bidder = await getSingleBidderWithData(bidInteraction.user.id, bidInteraction, db);
-        if(!bidder) {
-            await interaction.reply({ content: 'You are not a bidder??? This should not happen, inform an admin please!', ephemeral: true });
+        if (!bidder) {
+            await bidInteraction.reply({ content: 'You are not a bidder??? This should not happen, inform an admin please!', ephemeral: true });
+            return;
+        }
+
+        const { currentGroupCountInTeam } = await db.get('SELECT COUNT(*) AS currentGroupCountInTeam FROM bids WHERE final_bidder_id = ?', bidder.bidder_id);
+        if (currentGroupCountInTeam >= MAX_GROUP_COUNT_IN_TEAM) {
+            bidInteraction.reply({ content: `You have reached the maximum of ${MAX_GROUP_COUNT_IN_TEAM} ${BID_GROUP_NAME_PLURAL} already!`, ephemeral: true });
             return;
         }
 
@@ -78,7 +84,7 @@ function initCollector(interaction, db, group) {
                 WHERE ongoing = TRUE;
             `)
         } else {
-            await interaction.followUp(`${group.group_name} (${group.players.map(x => x.username).join(', ')}) has been sold to ${lastBidder.bidder_name} (${lastBidder.members.join(', ')}) for ${ saleValue }`);
+            await interaction.followUp(`${group.group_name} (${group.players.map(x => x.username).join(', ')}) has been sold to ${lastBidder.bidder_name} (${lastBidder.members.join(', ')}) for ${saleValue}`);
             await db.run(`
                 UPDATE bids
                 SET sale_value      = ?,
@@ -113,7 +119,7 @@ function generateGroupCardMessage(group) {
         ]
     };
 
-    for(const player of group.players) {
+    for (const player of group.players) {
         const imageUrl = `https://a.ppy.sh/${player.user_id}?.png`;
         const flagUrl = `https://osu.ppy.sh/images/flags/${player.country}.png`;
         const profileUrl = `https://osu.ppy.sh/users/${player.user_id}`;
@@ -147,7 +153,7 @@ function generateGroupCardMessage(group) {
             },
         }
 
-        if(player.badge_count) {
+        if (player.badge_count) {
             playerEmbed.fields.push({
                 name: `Badges`,
                 value: player.badge_count.toString(),

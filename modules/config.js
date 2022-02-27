@@ -25,6 +25,7 @@ module.exports = {
     MAX_BID: parseIntOrThrow(process.env.MAX_BID),
     START_VALUE: parseIntOrThrow(process.env.START_VALUE),
     MIN_INCREMENT: parseIntOrThrow(process.env.MIN_INCREMENT),
+    MAX_GROUP_COUNT_IN_TEAM: parseIntOrThrow(process.env.MAX_GROUP_COUNT_IN_TEAM),
     BID_GROUP_NAME: process.env.BID_GROUP_NAME,
     BID_GROUP_NAME_PLURAL: process.env.BID_GROUP_NAME_PLURAL,
     GROUP_NAME_EMBED_COLOR: parseColor(process.env.GROUP_NAME_EMBED_COLOR),
