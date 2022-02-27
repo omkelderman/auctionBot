@@ -21,9 +21,9 @@ module.exports = {
             range: 'BotData!A2:J',
         });
 
-        const playerGroupQualRankResult = await sheetsApiClient.spreadsheets.values.get({
+        const playerGroupDataResultResult = await sheetsApiClient.spreadsheets.values.get({
             spreadsheetId: GOOGLE_SHEET_ID,
-            range: 'BotData!L2:L',
+            range: 'BotData!K2:L',
         });
 
         const allPlayers = new Map();
@@ -70,19 +70,18 @@ module.exports = {
         console.log('player duos:', allPlayers.size);
         console.log('captain duos:', captains.size);
 
-        const playerGroupQualRanks = new Map(playerGroupQualRankResult.data.values.map(x => x[0]).filter(x => allPlayers.has(x)).map((x, i) => [x, i + 1]));
+        const playerGroupDataPerGroupName = new Map(playerGroupDataResultResult.data.values.map(x => ({name: x[1].trim(), draftOrder: x[0]})).filter(x => allPlayers.has(x.name)).map((x, i) => [x.name, {index: i, draftOrder: x.draftOrder}]));
 
         const playerGroups = [];
         for (const [playerGroupName, players] of allPlayers) {
-            const qualifierSeed = playerGroupQualRanks.get(playerGroupName);
-            if (!qualifierSeed) {
-                await interaction.followUp(`ERROR: cannot find the qualifier seed value of '${playerGroupName}' on the sheet`);
+            const playerGroupData = playerGroupDataPerGroupName.get(playerGroupName);
+            if (!playerGroupData) {
+                await interaction.followUp(`ERROR: cannot find the qualifier seed value and draft order of '${playerGroupName}' on the sheet`);
                 return;
             }
 
-            playerGroups.push({ qualifierSeed, playerGroupName, players });
+            playerGroups.push({ qualifierSeed: playerGroupData.index, draftOrder: playerGroupData.draftOrder, playerGroupName, players });
         }
-
 
         // reset data
         await db.run('DELETE FROM bids');
@@ -110,10 +109,10 @@ module.exports = {
         }
 
         // add players
-        for (const { qualifierSeed, playerGroupName, players } of playerGroups) {
+        for (const { qualifierSeed, draftOrder, playerGroupName, players } of playerGroups) {
             // add player group
             console.log(`Adding player group ${playerGroupName}`);
-            const bidderInsertResult = await db.run('INSERT INTO player_groups (group_name, qualifier_seed) VALUES (?, ?)', playerGroupName, qualifierSeed);
+            const bidderInsertResult = await db.run('INSERT INTO player_groups (group_name, qualifier_seed, draft_order) VALUES (?, ?, ?)', playerGroupName, qualifierSeed, draftOrder);
 
             for (const player of players) {
                 await db.run('INSERT INTO players (user_id, group_id, username, country, rank, bws, qualifier_seed, badge_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',

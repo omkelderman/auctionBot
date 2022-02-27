@@ -21,7 +21,8 @@ async function initPlayersTable(db) {
         (
             group_id        INTEGER PRIMARY KEY,
             group_name      TEXT,
-            qualifier_seed  INTEGER
+            qualifier_seed  INTEGER,
+            draft_order     INTEGER
         )
     `);
 }

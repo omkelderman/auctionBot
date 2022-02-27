@@ -12,7 +12,7 @@ module.exports = {
         await addDataToBiddersArray(bidders, db, interaction.guild.members);
         const biddersData = bidders.map(bidder => `• \`${bidder.bidder_name}\` ($${bidder.balance}): ${bidder.members.join(', ')}`);
 
-        const playerGroups = await db.all('SELECT * FROM player_groups');
+        const playerGroups = await db.all('SELECT * FROM player_groups ORDER BY draft_order');
         await addPlayerDataToPlayerGroups(playerGroups, db);
         const playerGroupsData = playerGroups.map(group => `\`${group.group_name}\`\n${group.players.map(player => `• \`${player.username}\` (${player.country}) | Qual. Seed #${player.qualifier_seed} | BWS#${player.bws} | #${player.rank}`).join('\n')}`);
 

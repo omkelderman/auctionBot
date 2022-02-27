@@ -183,7 +183,7 @@ module.exports = {
             SELECT *
             FROM player_groups
             WHERE group_id NOT IN (SELECT group_id FROM bids)
-            ORDER BY RANDOM()
+            ORDER BY draft_order
             LIMIT 1;
         `);
 
