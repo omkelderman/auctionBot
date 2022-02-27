@@ -99,11 +99,14 @@ async function addPlayerDataToPlayerGroups(groups, db) {
     }
 }
 
+
+const MAX_EMBED_CONTENT_LENGTH = 4096;
+const MAX_EMBEDS_IN_MESSAGE = 10;
+const MAX_EMBEDS_ALL_CHAR_COUNT_IN_MESSAGE = 6000;
+
 function contentsArrayToEmbedsArray(title, ...data) {
     const contentsArray = [];
     let lastContent = '';
-
-    const MAX_EMBED_CONTENT_LENGTH = 4096;
 
     for (const content of data) {
         if (content.length > MAX_EMBED_CONTENT_LENGTH) {
@@ -136,12 +139,22 @@ function contentsArrayToEmbedsArray(title, ...data) {
 }
 
 async function replyWithEmbeds(interaction, ephemeral, ...embeds) {
-    const MAX_EMBEDS_IN_MESSAGE = 10;
-
     let processed = 0;
     while (processed < embeds.length) {
-        const chunk = embeds.slice(processed, processed + MAX_EMBEDS_IN_MESSAGE);
-        processed += chunk.length;
+        //const chunk = embeds.slice(processed, processed + MAX_EMBEDS_IN_MESSAGE);
+        const chunk = [];
+        let allCharsCount = 0;
+        while(chunk.length < MAX_EMBEDS_IN_MESSAGE && processed < embeds.length) {
+            let next = embeds[processed];
+            let nextCharCount = next.title.length + next.description.length;
+            if((allCharsCount + nextCharCount) > MAX_EMBEDS_ALL_CHAR_COUNT_IN_MESSAGE) {
+                // reached limit for one message
+                break;
+            }
+            chunk.push(next);
+            ++processed;
+            allCharsCount += nextCharCount;
+        }
 
         if (interaction.replied) {
             await interaction.followUp({

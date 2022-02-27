@@ -10,11 +10,11 @@ module.exports = {
     handler: async (interaction, db) => {
         const bidders = await db.all('SELECT * FROM bidders');
         await addDataToBiddersArray(bidders, db, interaction.guild.members);
-        const biddersData = bidders.map(bidder => `• **${bidder.bidder_name}** ($${bidder.balance}): ${bidder.members.join(', ')}`);
+        const biddersData = bidders.map(bidder => `• \`${bidder.bidder_name}\` ($${bidder.balance}): ${bidder.members.join(', ')}`);
 
         const playerGroups = await db.all('SELECT * FROM player_groups');
         await addPlayerDataToPlayerGroups(playerGroups, db);
-        const playerGroupsData = playerGroups.map(group => `**${group.group_name}**\n${group.players.map(player => `• ${player.username} (${player.country}) | Qual. Seed #${player.qualifier_seed} | BWS#${player.bws} | #${player.rank}`).join('\n')}`);
+        const playerGroupsData = playerGroups.map(group => `\`${group.group_name}\`\n${group.players.map(player => `• \`${player.username}\` (${player.country}) | Qual. Seed #${player.qualifier_seed} | BWS#${player.bws} | #${player.rank}`).join('\n')}`);
 
         const biddersEmbeds = contentsArrayToEmbedsArray('Bidding Groups', ...biddersData);
         const playerGroupsEmbeds = contentsArrayToEmbedsArray('Player Groups', ...playerGroupsData);
