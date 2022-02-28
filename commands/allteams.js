@@ -1,5 +1,5 @@
 const { ADMIN_ROLE_ID } = require('../modules/config');
-const { addDataToBiddersArray } = require('./_util');
+const { addDataToBiddersArray, contentsArrayToEmbedsArray, replyWithEmbeds } = require('./_util');
 
 module.exports = {
     data: {
@@ -21,12 +21,16 @@ module.exports = {
         await addDataToBiddersArray(bidders, db, interaction.guild.members, true);
 
         const output = bidders.map(bidder => {
-            const team = bidder.boughtGroups.length
-                ? bidder.boughtGroups.map(g => `**${g.groupName}** (${g.playerNames.join(', ')})`).join(', ')
-                : '-';
-            return `**${bidder.bidder_name}** (${bidder.members.join(', ')}): ${team}`;
+            if (bidder.boughtGroups.length) {
+                const team = bidder.boughtGroups.map(g => `• **${g.groupName}** (${g.playerNames.join(', ')})`);
+                return `**${bidder.bidder_name}** (${bidder.members.join(', ')}):\n${team.join('\n')}`;
+            } else {
+                return `**${bidder.bidder_name}** (${bidder.members.join(', ')}): -`;
+            }
         });
-        await interaction.reply({ content: output.join("\n") });
+
+        const embeds = contentsArrayToEmbedsArray('All Teams', ...output);
+        await replyWithEmbeds(interaction, false, ...embeds);
     },
     permissions: [
         {
