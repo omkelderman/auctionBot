@@ -1,4 +1,4 @@
-const { ADMIN_ROLE_ID } = require('../modules/config');
+const { ADMIN_ROLE_ID, CURRENCY_NAME } = require('../modules/config');
 const { getSingleBidderWithData } = require('./_util');
 
 module.exports = {
@@ -9,12 +9,12 @@ module.exports = {
         options: [{
             name: "amount",
             type: "INTEGER",
-            description: "The amount of currency to set to",
+            description: `The amount of ${CURRENCY_NAME} to set to`,
             required: true,
         }, {
             name: "user",
             type: "USER",
-            description: "The user to set the currency for",
+            description: "The user to set the balance for",
             required: true,
         }],
     },
@@ -33,7 +33,7 @@ module.exports = {
             WHERE bidder_id = ?
         `, amount, bidder.bidder_id);
 
-        await interaction.reply(`Set currency of ${bidder.bidder_name} (${bidder.members.join(', ')}) to ${ amount }`);
+        await interaction.reply(`Set balance of ${bidder.bidder_name} (${bidder.members.join(', ')}) to ${ amount }`);
     },
     permissions: [
         {

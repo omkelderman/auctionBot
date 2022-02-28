@@ -1,4 +1,4 @@
-const { BIDDER_ROLE_ID } = require('../modules/config');
+const { BIDDER_ROLE_ID, CURRENCY_SYMBOL_EMOTE_ID } = require('../modules/config');
 const { getSingleBidderWithData } = require('./_util');
 
 module.exports = {
@@ -16,7 +16,8 @@ module.exports = {
 
         const header = `**${bidder.bidder_name}** (${bidder.members.join(', ')})`;
         if(bidder.boughtGroups.length) {
-            const team = bidder.boughtGroups.map(g => `- **${g.groupName}** ($${g.saleValue}): ${g.playerNames.join(', ')}`);
+            const currencySymbolEmoji = await interaction.guild.emojis.fetch(CURRENCY_SYMBOL_EMOTE_ID);
+            const team = bidder.boughtGroups.map(g => `- **${g.groupName}** (${currencySymbolEmoji}${g.saleValue}): ${g.playerNames.join(', ')}`);
             await interaction.reply(`${header}:\n${team.join('\n')}`);
         } else {
             await interaction.reply(`${header}: -`);

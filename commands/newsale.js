@@ -1,8 +1,8 @@
 const Discord = require("discord.js")
-const { ADMIN_ROLE_ID, MIN_INCREMENT, INITIAL_TIMER, IDLE_TIMER, MAX_BID, START_VALUE, BID_GROUP_NAME, BID_GROUP_NAME_PLURAL, GROUP_NAME_EMBED_COLOR, PLAYER_INFO_EMBED_COLOR, MAX_GROUP_COUNT_IN_TEAM } = require('../modules/config');
+const { ADMIN_ROLE_ID, MIN_INCREMENT, INITIAL_TIMER, IDLE_TIMER, MAX_BID, START_VALUE, BID_GROUP_NAME, BID_GROUP_NAME_PLURAL, GROUP_NAME_EMBED_COLOR, PLAYER_INFO_EMBED_COLOR, MAX_GROUP_COUNT_IN_TEAM, CURRENCY_NAME, CURRENCY_SYMBOL_EMOTE_ID } = require('../modules/config');
 const { getSingleBidderWithData, addPlayerDataToPlayerGroups } = require('./_util');
 
-async function checkBid(bidValue, bidInteraction, balance, saleValue) {
+async function checkBid(bidValue, bidInteraction, balance, saleValue, currencySymbolEmoji) {
     if (bidValue > MAX_BID) {
         await bidInteraction.reply({
             content: `You're only allowed to bid up to a maximum of ${MAX_BID} in an auction! Bid ${MAX_BID} exactly in case you want to buy the ${BID_GROUP_NAME} instantly.`,
@@ -13,7 +13,7 @@ async function checkBid(bidValue, bidInteraction, balance, saleValue) {
 
     if (bidValue > balance) {
         await bidInteraction.reply({
-            content: `You cannot bid more money than you currently possess! (${balance})`,
+            content: `You cannot bid more ${CURRENCY_NAME} than you currently possess! (${balance})`,
             ephemeral: true,
         });
         return false;
@@ -21,7 +21,7 @@ async function checkBid(bidValue, bidInteraction, balance, saleValue) {
 
     if (bidValue < saleValue + MIN_INCREMENT) {
         await bidInteraction.reply({
-            content: `You have to bid at least ${saleValue + MIN_INCREMENT} or higher!`,
+            content: `You have to bid at least ${currencySymbolEmoji}${saleValue + MIN_INCREMENT} or higher!`,
             ephemeral: true,
         });
         return false;
@@ -38,7 +38,7 @@ async function checkBid(bidValue, bidInteraction, balance, saleValue) {
     return true;
 }
 
-function initCollector(interaction, db, group) {
+function initCollector(interaction, db, group, currencySymbolEmoji) {
     let saleValue = START_VALUE;
     let lastBidder = null;
 
@@ -64,12 +64,12 @@ function initCollector(interaction, db, group) {
         }
 
         const bidValue = bidInteraction.options.get("amount").value;
-        if (!await checkBid(bidValue, bidInteraction, bidder.balance, saleValue)) return;
+        if (!await checkBid(bidValue, bidInteraction, bidder.balance, saleValue, currencySymbolEmoji)) return;
 
         saleValue = bidValue;
         lastBidder = bidder;
         const bidderStr = `${bidder.bidder_name} (${bidder.members.join(', ')})`;
-        await bidInteraction.reply(`${bidderStr} bids ${bidValue}.`);
+        await bidInteraction.reply(`${bidderStr} bids ${currencySymbolEmoji}${bidValue} ${CURRENCY_NAME}`);
 
         if (bidValue === MAX_BID) collector.stop();
         collector.resetTimer({ time: IDLE_TIMER });
@@ -84,7 +84,7 @@ function initCollector(interaction, db, group) {
                 WHERE ongoing = TRUE;
             `)
         } else {
-            await interaction.followUp(`${group.group_name} (${group.players.map(x => x.username).join(', ')}) has been sold to ${lastBidder.bidder_name} (${lastBidder.members.join(', ')}) for ${saleValue}`);
+            await interaction.followUp(`**${group.group_name}** (${group.players.map(x => x.username).join(', ')}) has been sold to **${lastBidder.bidder_name}** (${lastBidder.members.join(', ')}) for ${currencySymbolEmoji}${saleValue} ${CURRENCY_NAME}`);
             await db.run(`
                 UPDATE bids
                 SET sale_value      = ?,
@@ -206,9 +206,10 @@ module.exports = {
             VALUES (?, 0, TRUE, datetime('now'))
         `, randomAvailableGroup.group_id);
 
-        await interaction.reply(generateGroupCardMessage(randomAvailableGroup))
+        await interaction.reply(generateGroupCardMessage(randomAvailableGroup));
 
-        initCollector(interaction, db, randomAvailableGroup);
+        const currencySymbolEmoji = await interaction.guild.emojis.fetch(CURRENCY_SYMBOL_EMOTE_ID);
+        initCollector(interaction, db, randomAvailableGroup, currencySymbolEmoji);
     },
     permissions: [
         {

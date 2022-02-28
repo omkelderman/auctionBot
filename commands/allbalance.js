@@ -1,4 +1,4 @@
-const { ADMIN_ROLE_ID } = require('../modules/config');
+const { ADMIN_ROLE_ID, CURRENCY_NAME, CURRENCY_SYMBOL_EMOTE_ID } = require('../modules/config');
 const { addDataToBiddersArray } = require('./_util');
 
 module.exports = {
@@ -15,12 +15,14 @@ module.exports = {
         );
 
         if (!bidders.length) {
-            await interaction.reply({ content: "No bidder has currency!", ephemeral: true });
+            await interaction.reply({ content: `No bidder has ${CURRENCY_NAME}!`, ephemeral: true });
             return;
         }
 
+        const currencySymbolEmoji = await interaction.guild.emojis.fetch(CURRENCY_SYMBOL_EMOTE_ID);
+
         await addDataToBiddersArray(bidders, db, interaction.guild.members);
-        const output = bidders.map(bidder => `**${bidder.bidder_name}** (${ bidder.members.join(', ') }): $${ bidder.balance }`);
+        const output = bidders.map(bidder => `**${bidder.bidder_name}** (${ bidder.members.join(', ') }): ${currencySymbolEmoji}${ bidder.balance }`);
         await interaction.reply({ content: output.join("\n") });
     },
     permissions: [

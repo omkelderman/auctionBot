@@ -1,4 +1,4 @@
-const { ADMIN_ROLE_ID, BID_GROUP_NAME_PLURAL } = require('../modules/config');
+const { ADMIN_ROLE_ID, BID_GROUP_NAME_PLURAL, CURRENCY_SYMBOL_EMOTE_ID } = require('../modules/config');
 const { addDataToBiddersArray, addPlayerDataToPlayerGroups, contentsArrayToEmbedsArray, replyWithEmbeds } = require('./_util');
 
 module.exports = {
@@ -8,9 +8,11 @@ module.exports = {
         defaultPermission: false,
     },
     handler: async (interaction, db) => {
+        const currencySymbolEmoji = await interaction.guild.emojis.fetch(CURRENCY_SYMBOL_EMOTE_ID);
+
         const bidders = await db.all('SELECT * FROM bidders');
         await addDataToBiddersArray(bidders, db, interaction.guild.members);
-        const biddersData = bidders.map(bidder => `• \`${bidder.bidder_name}\` ($${bidder.balance}): ${bidder.members.join(', ')}`);
+        const biddersData = bidders.map(bidder => `• \`${bidder.bidder_name}\` (${currencySymbolEmoji}${bidder.balance}): ${bidder.members.join(', ')}`);
 
         const playerGroups = await db.all('SELECT * FROM player_groups ORDER BY draft_order');
         await addPlayerDataToPlayerGroups(playerGroups, db);

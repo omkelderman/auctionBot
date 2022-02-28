@@ -1,4 +1,4 @@
-const { BIDDER_ROLE_ID, BID_GROUP_NAME } = require('../modules/config');
+const { BIDDER_ROLE_ID, BID_GROUP_NAME, CURRENCY_NAME } = require('../modules/config');
 
 module.exports = {
     data: {
@@ -8,7 +8,7 @@ module.exports = {
         options: [{
             name: "amount",
             type: "INTEGER",
-            description: "Amount of currency to bid",
+            description: `Amount of ${CURRENCY_NAME} to bid`,
             required: true,
         }],
     },

@@ -1,4 +1,4 @@
-const { ADMIN_ROLE_ID } = require('../modules/config');
+const { ADMIN_ROLE_ID, CURRENCY_NAME } = require('../modules/config');
 
 module.exports = {
     data: {
@@ -8,7 +8,7 @@ module.exports = {
         options: [{
             name: "amount",
             type: "INTEGER",
-            description: "The amount of currency to set to",
+            description: `The amount of ${CURRENCY_NAME} to set to`,
             required: true,
         }],
     },
