@@ -37,6 +37,7 @@ module.exports = {
         }
         var excludedGroups = new Set();
         for (const row of result.data.values) {
+            if(row[0].trim().length == 0) continue;
             const player = {
                 id: parseIntOrThrow(row[1]),
                 username: row[0].trim(),
