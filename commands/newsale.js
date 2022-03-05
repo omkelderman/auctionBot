@@ -38,7 +38,7 @@ async function checkBid(bidValue, bidInteraction, balance, saleValue, currencySy
     return true;
 }
 
-function initCollector(interaction, db, group, currencySymbolEmoji) {
+function initCollector(interaction, db, group, currencySymbolEmoji, twitchClient) {
     let saleValue = START_VALUE;
     let lastBidder = null;
 
@@ -85,6 +85,7 @@ function initCollector(interaction, db, group, currencySymbolEmoji) {
             `)
         } else {
             await interaction.followUp(`**${group.group_name}** (${group.players.map(x => x.username).join(', ')}) has been sold to **${lastBidder.bidder_name}** (${lastBidder.members.join(', ')}) for ${currencySymbolEmoji}${saleValue} ${CURRENCY_NAME}`);
+            await twitchClient(`${group.group_name} (${group.players.map(x => x.username).join(', ')}) has been sold to ${lastBidder.bidder_name} (${lastBidder.members.join(', ')}) for ${saleValue} ${CURRENCY_NAME}`);
             await db.run(`
                 UPDATE bids
                 SET sale_value      = ?,
@@ -173,7 +174,7 @@ module.exports = {
         description: "Create a new sale",
         defaultPermission: false,
     },
-    handler: async (interaction, db) => {
+    handler: async (interaction, db, _, twitchClient) => {
         const ongoing = await db.get(`
             SELECT *
             FROM bids
@@ -209,7 +210,7 @@ module.exports = {
         await interaction.reply(generateGroupCardMessage(randomAvailableGroup));
 
         const currencySymbolEmoji = await interaction.guild.emojis.fetch(CURRENCY_SYMBOL_EMOTE_ID);
-        initCollector(interaction, db, randomAvailableGroup, currencySymbolEmoji);
+        initCollector(interaction, db, randomAvailableGroup, currencySymbolEmoji, twitchClient);
     },
     permissions: [
         {

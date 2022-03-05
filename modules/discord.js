@@ -12,7 +12,7 @@ function importCommands() {
     return commands;
 }
 
-async function run(db, sheetsApiClient) {
+async function run(db, sheetsApiClient, twitchClient) {
     let commands = importCommands();
 
     const intents = new Discord.Intents();
@@ -40,7 +40,7 @@ async function run(db, sheetsApiClient) {
         const commandName = interaction.commandName.toLowerCase();
         console.log(`Received interaction "${commandName}" from "${interaction.user.username}"`)
         try {
-            await commands.get(commandName).handler(interaction, db, sheetsApiClient);
+            await commands.get(commandName).handler(interaction, db, sheetsApiClient, twitchClient);
         } catch (e) {
             console.error(e);
 
