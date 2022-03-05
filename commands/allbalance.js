@@ -1,4 +1,4 @@
-const { ADMIN_ROLE_ID, CURRENCY_NAME, CURRENCY_SYMBOL_EMOTE_ID } = require('../modules/config');
+const { ADMIN_ROLE_ID, BIDDER_ROLE_ID, CURRENCY_NAME, CURRENCY_SYMBOL_EMOTE_ID } = require('../modules/config');
 const { addDataToBiddersArray } = require('./_util');
 
 module.exports = {
@@ -23,11 +23,16 @@ module.exports = {
 
         await addDataToBiddersArray(bidders, db, interaction.guild.members);
         const output = bidders.map(bidder => `**${bidder.bidder_name}** (${ bidder.members.join(', ') }): ${currencySymbolEmoji}${ bidder.balance }`);
-        await interaction.reply({ content: output.join("\n") });
+        await interaction.reply({ content: output.join("\n"), ephemeral: true });
     },
     permissions: [
         {
             id: ADMIN_ROLE_ID,
+            type: "ROLE",
+            permission: true,
+        },
+        {
+            id: BIDDER_ROLE_ID,
             type: "ROLE",
             permission: true,
         },

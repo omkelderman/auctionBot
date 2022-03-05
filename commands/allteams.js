@@ -1,4 +1,4 @@
-const { ADMIN_ROLE_ID } = require('../modules/config');
+const { ADMIN_ROLE_ID, BIDDER_ROLE_ID } = require('../modules/config');
 const { addDataToBiddersArray, contentsArrayToEmbedsArray, replyWithEmbeds } = require('./_util');
 
 module.exports = {
@@ -30,11 +30,16 @@ module.exports = {
         });
 
         const embeds = contentsArrayToEmbedsArray('All Teams', ...output);
-        await replyWithEmbeds(interaction, false, ...embeds);
+        await replyWithEmbeds(interaction, true, ...embeds);
     },
     permissions: [
         {
             id: ADMIN_ROLE_ID,
+            type: "ROLE",
+            permission: true,
+        },
+        {
+            id: BIDDER_ROLE_ID,
             type: "ROLE",
             permission: true,
         },
