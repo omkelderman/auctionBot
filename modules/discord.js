@@ -66,4 +66,17 @@ async function run(db, sheetsApiClient, twitchClient) {
     return client;
 }
 
-module.exports = { run };
+async function connectSimple() {
+    const intents = new Discord.Intents();
+    intents.add("GUILDS", "GUILD_MESSAGES", "GUILD_MEMBERS");
+    const client = new Discord.Client({ intents });
+    const p = new Promise((resolve, reject) => {
+        client.once('ready', resolve);
+        client.once('error', reject);
+    });
+    await client.login(TOKEN);
+    await p;
+    return client;
+}
+
+module.exports = { run, connectSimple };
